@@ -1,0 +1,19 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "empire-plasma"
+            }
+        ],
+        "Category": "Windows and Tasks",
+        "Description": "Roman-numeral virtual desktop indicator (I II III) with a slate capsule for the active desktop.",
+        "Icon": "virtual-desktops",
+        "Id": "org.empire.mist.ages",
+        "License": "MIT",
+        "Name": "Empire Ages",
+        "Version": "1.0.0",
+        "Website": "https://github.com/dani3lsamir/aoe-plasma"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

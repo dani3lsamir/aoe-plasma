@@ -1,0 +1,19 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "empire-plasma"
+            }
+        ],
+        "Category": "Windows and Tasks",
+        "Description": "A one-pixel separator line for the panel.",
+        "Icon": "distribute-horizontal-x",
+        "Id": "org.empire.mist.separator",
+        "License": "MIT",
+        "Name": "Empire Separator",
+        "Version": "1.0.0",
+        "Website": "https://github.com/dani3lsamir/aoe-plasma"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

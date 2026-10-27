@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0 http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+  <kcfgfile name=""/>
+  <group name="General">
+    <entry name="localeName" type="String">
+      <label>Locale for month names (en_US gives "Oct"; es_ES gives "oct"); empty follows the system</label>
+      <default>en_US</default>
+    </entry>
+    <entry name="twentyFourHour" type="Bool">
+      <default>false</default>
+    </entry>
+    <entry name="showDate" type="Bool">
+      <default>true</default>
+    </entry>
+    <entry name="fontFamily" type="String">
+      <label>Empty uses the Plasma font</label>
+      <default></default>
+    </entry>
+    <entry name="fontScale" type="Double">
+      <label>Text height relative to the panel thickness</label>
+      <default>0.42</default>
+    </entry>
+    <entry name="letterSpacing" type="Double">
+      <default>0.6</default>
+    </entry>
+  </group>
+</kcfg>

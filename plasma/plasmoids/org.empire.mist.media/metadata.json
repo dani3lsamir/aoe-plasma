@@ -1,0 +1,19 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "empire-plasma"
+            }
+        ],
+        "Category": "Multimedia",
+        "Description": "Inline track title with previous / play-pause / next. Hidden when no MPRIS player is active.",
+        "Icon": "media-playback-start-symbolic",
+        "Id": "org.empire.mist.media",
+        "License": "MIT",
+        "Name": "Empire Media",
+        "Version": "1.0.0",
+        "Website": "https://github.com/dani3lsamir/aoe-plasma"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

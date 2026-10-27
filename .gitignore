@@ -1,0 +1,11 @@
+# Editor / OS noise
+*~
+*.swp
+.DS_Store
+.idea/
+.vscode/
+
+# Never commit personal state: backups and local overrides stay in $HOME
+/backups/
+*.local
+*.bak
