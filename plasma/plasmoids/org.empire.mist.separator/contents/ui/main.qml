@@ -26,7 +26,7 @@ PlasmoidItem {
         Rectangle {
             anchors.centerIn: parent
             width: parent.lineWidth
-            height: Math.round(parent.height * 0.5)
+            height: Math.round(parent.height * 0.68)
             // Solid mix of panel background and text color: visible, never loud.
             color: Qt.tint(Kirigami.Theme.backgroundColor, Qt.alpha(Kirigami.Theme.textColor, 0.22))
         }

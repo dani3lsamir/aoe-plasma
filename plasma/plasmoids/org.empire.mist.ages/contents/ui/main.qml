@@ -70,7 +70,9 @@ PlasmoidItem {
     fullRepresentation: MouseArea {
         id: area
 
-        readonly property int capsuleHeight: Math.max(16, Math.round(root.height * 0.72))
+        // Sizes are relative to the applet height Plasma gives us: the panel thickness
+        // minus the Breeze panel margins (30px bar → 22px applet).
+        readonly property int capsuleHeight: Math.max(16, Math.round(root.height))
         property int wheelDelta: 0
 
         Layout.minimumWidth: row.implicitWidth
@@ -124,7 +126,7 @@ PlasmoidItem {
                         text: root.roman(age.index + 1)
                         color: age.isCurrent ? Kirigami.Theme.textColor : Kirigami.Theme.disabledTextColor
                         font.family: Plasmoid.configuration.fontFamily || Kirigami.Theme.defaultFont.family
-                        font.pixelSize: Math.round(area.capsuleHeight * 0.52)
+                        font.pixelSize: Math.round(area.capsuleHeight * 0.55)
                         font.weight: age.isCurrent ? Font.DemiBold : Font.Normal
                         renderType: Text.NativeRendering
                     }

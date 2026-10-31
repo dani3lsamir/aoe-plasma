@@ -31,7 +31,7 @@ PlasmoidItem {
         }
         return player?.identity ?? "";
     }
-    readonly property int controlSize: Math.max(14, Math.round(root.height * 0.55))
+    readonly property int controlSize: Math.max(14, Math.round(root.height * 0.72))
 
     preferredRepresentation: fullRepresentation
     Plasmoid.backgroundHints: PlasmaCore.Types.NoBackground
@@ -94,7 +94,7 @@ PlasmoidItem {
             Layout.rightMargin: 8
             Layout.alignment: Qt.AlignVCenter
             implicitWidth: 1
-            implicitHeight: Math.round(root.height * 0.5)
+            implicitHeight: Math.round(root.height * 0.68)
             color: Qt.tint(Kirigami.Theme.backgroundColor, Qt.alpha(Kirigami.Theme.textColor, 0.22))
         }
 

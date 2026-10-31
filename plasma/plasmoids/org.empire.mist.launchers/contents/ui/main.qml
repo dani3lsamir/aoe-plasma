@@ -29,6 +29,7 @@ import org.kde.taskmanager as TaskManager
 PlasmoidItem {
     id: root
 
+    // Relative to the applet height Plasma gives us (30px bar → 22px): 1.0 = full height.
     readonly property int iconSize: Math.max(16, Math.round(root.height * Plasmoid.configuration.iconScale))
     property var menuTask: null
 
@@ -162,8 +163,8 @@ PlasmoidItem {
                     readonly property bool running: model.IsWindow === true
 
                     visible: pinned || Plasmoid.configuration.showUnpinned
-                    width: visible ? root.iconSize + 10 : 0
-                    height: root.iconSize + 8
+                    width: visible ? root.iconSize + 8 : 0
+                    height: root.height
                     mainText: model.AppName || model.display || ""
                     subText: model.IsGroupParent ? i18np("%1 window", "%1 windows", model.ChildCount) : ""
 
@@ -177,7 +178,6 @@ PlasmoidItem {
                     Kirigami.Icon {
                         id: icon
                         anchors.centerIn: parent
-                        anchors.verticalCenterOffset: -1
                         width: root.iconSize
                         height: root.iconSize
                         source: task.model.decoration
@@ -192,10 +192,12 @@ PlasmoidItem {
                         }
                     }
 
-                    // Running marker: short line under the icon, longer when focused.
+                    // Running marker: short line under the icon (in the panel's bottom
+                    // margin), longer when focused.
                     Rectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.bottom: parent.bottom
+                        anchors.top: parent.bottom
+                        anchors.topMargin: 1
                         visible: task.running
                         width: task.model.IsActive ? Math.round(root.iconSize * 0.5) : 4
                         height: 2

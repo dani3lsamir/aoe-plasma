@@ -197,12 +197,12 @@ Los colores de Konsole están en `config/konsole/EmpireMist.colorscheme`. Los de
 **Tamaños:**
 
 - **Grosor de la barra:** `./install.sh --thickness 28`, o *clic derecho en la barra → Mostrar configuración del panel → Altura*.
-- **Iconos de las apps ancladas:** *Configure Launchers… → Icon size*. Es un porcentaje del grosor de la barra; por defecto 72 %, unos 22 px en una barra de 30 px.
+- **Iconos de las apps ancladas:** *Configure Launchers… → Icon size*. Es un porcentaje de la altura útil del widget. Plasma deja 4 px arriba y abajo, así que en una barra de 30 px esa altura es de 22 px; por defecto 100 % = 22 px.
 - **Ajustes guardados por widget** en `~/.config/plasma-org.kde.plasma.desktop-appletsrc` (se aplican al reiniciar Plasma: `systemctl --user restart plasma-plasmashell`):
 
 | Widget | Clave | Por defecto | Qué hace |
 |---|---|---|---|
-| Empire Clock | `fontScale` | `0.42` | Tamaño del texto respecto al grosor de la barra |
+| Empire Clock | `fontScale` | `0.6` | Tamaño del texto respecto a la altura del widget (≈ 13 px en una barra de 30 px) |
 | Empire Clock | `letterSpacing` | `0.6` | Espaciado entre letras |
 | Empire Clock | `localeName` | `en_US` | Idioma de los meses: `es_ES` da `oct` |
 | Empire Clock | `twentyFourHour` | `false` | Formato de 24 horas |

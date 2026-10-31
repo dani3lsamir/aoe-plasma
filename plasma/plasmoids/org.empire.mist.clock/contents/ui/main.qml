@@ -149,7 +149,7 @@ PlasmoidItem {
             Rectangle {
                 anchors.centerIn: parent
                 width: parent.width
-                height: Math.round(parent.height * 0.72)
+                height: parent.height
                 radius: 5
                 visible: clockArea.containsMouse || calendar.shown
                 color: calendar.shown ? Kirigami.Theme.highlightColor

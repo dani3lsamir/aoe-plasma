@@ -70,7 +70,7 @@ PlasmoidItem {
     fullRepresentation: MouseArea {
         id: button
 
-        readonly property int iconSize: Math.max(14, Math.round(root.height * 0.6))
+        readonly property int iconSize: Math.max(14, Math.round(root.height * 0.82))
 
         Layout.minimumWidth: iconSize + 14
         Layout.preferredWidth: Layout.minimumWidth
@@ -87,7 +87,7 @@ PlasmoidItem {
         Rectangle {
             anchors.centerIn: parent
             width: parent.width
-            height: Math.round(parent.height * 0.72)
+            height: parent.height
             radius: 5
             visible: button.containsMouse || menu.status === PlasmaExtras.Menu.Open
             color: Qt.tint(Kirigami.Theme.backgroundColor, Qt.alpha(Kirigami.Theme.highlightColor, 0.55))

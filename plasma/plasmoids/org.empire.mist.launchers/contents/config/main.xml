@@ -20,8 +20,8 @@
       <default>false</default>
     </entry>
     <entry name="iconScale" type="Double">
-      <label>Icon size relative to the panel thickness</label>
-      <default>0.72</default>
+      <label>Icon size relative to the applet height (1.0 = 22px in a 30px bar)</label>
+      <default>1.0</default>
     </entry>
     <entry name="spacing" type="Int">
       <default>0</default>

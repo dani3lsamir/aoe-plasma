@@ -53,8 +53,8 @@ KCM.SimpleKCM {
         QQC2.Slider {
             id: scale
             Kirigami.FormData.label: i18n("Icon size:")
-            from: 0.5
-            to: 0.9
+            from: 0.6
+            to: 1.0
             stepSize: 0.02
         }
         QQC2.CheckBox {
