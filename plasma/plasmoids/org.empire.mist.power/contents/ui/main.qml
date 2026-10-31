@@ -1,5 +1,5 @@
 /*
-    Empire Power — one icon at the far right, one native menu:
+    Empire Power — one icon at the very end of the bar, one native menu:
     Lock · Sleep · Log Out · Restart · Shut Down
 
     Why not the native Lock/Logout widget: it puts one icon per action in the
@@ -30,7 +30,10 @@ PlasmoidItem {
     PlasmaExtras.Menu {
         id: menu
 
-        placement: PlasmaExtras.Menu.BottomPosedRightAlignedPopup
+        // Left vertical bar: open to the right of the icon; top bar: open below it.
+        placement: Plasmoid.formFactor === PlasmaCore.Types.Vertical
+            ? PlasmaExtras.Menu.RightPosedBottomAlignedPopup
+            : PlasmaExtras.Menu.BottomPosedRightAlignedPopup
 
         PlasmaExtras.MenuItem {
             text: i18n("Lock")
@@ -70,12 +73,19 @@ PlasmoidItem {
     fullRepresentation: MouseArea {
         id: button
 
-        readonly property int iconSize: Math.max(14, Math.round(root.height * 0.82))
+        readonly property bool vertical: Plasmoid.formFactor === PlasmaCore.Types.Vertical
+        // Applet thickness = panel thickness minus the Breeze panel margins.
+        readonly property int iconSize: Math.max(14, Math.round(vertical ? root.width * 0.55 : root.height * 0.82))
+        readonly property int length: iconSize + 14
 
-        Layout.minimumWidth: iconSize + 14
-        Layout.preferredWidth: Layout.minimumWidth
-        Layout.maximumWidth: Layout.minimumWidth
-        Layout.fillHeight: true
+        Layout.minimumWidth: vertical ? 0 : length
+        Layout.preferredWidth: vertical ? -1 : length
+        Layout.maximumWidth: vertical ? Infinity : length
+        Layout.minimumHeight: vertical ? length : 0
+        Layout.preferredHeight: vertical ? length : -1
+        Layout.maximumHeight: vertical ? length : Infinity
+        Layout.fillWidth: vertical
+        Layout.fillHeight: !vertical
 
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor

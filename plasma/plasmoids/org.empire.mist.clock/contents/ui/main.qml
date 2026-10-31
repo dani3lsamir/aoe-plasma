@@ -1,21 +1,19 @@
 /*
-    Empire Clock — "Oct 26 · 4:27 P", centered on the screen, click for the calendar.
+    Empire Clock — time over date at the bottom of the vertical bar:
 
-    Why not the native Digital Clock:
-      1. Centering. A panel lays widgets out in a row, so a clock between two
-         flexible spacers is centered between the left and right groups, not
-         on the screen: whenever the groups differ in width (music appears,
-         a tray icon shows up), the clock drifts. Here the applet fills the
-         whole middle of the panel and places the text at the panel window's
-         center, so side modules never move it.
-      2. Format. The Digital Clock follows the locale's time format and cannot
-         produce a one-letter A/P suffix.
-    The calendar is KDE's own MonthView (the one inside the Digital Clock
-    popup), opened in a Plasma dialog anchored under the text.
+        1:38
+        10/31
+
+    Click for the KDE calendar.
+
+    Why not the native Digital Clock: in 12-hour mode it always appends the
+    locale's AM/PM suffix ("1:38 PM"), which does not fit a narrow vertical
+    bar and is not the requested look. The calendar is KDE's own MonthView
+    (the one inside the Digital Clock popup), opened in a Plasma dialog next
+    to the clock. In a horizontal panel it falls back to one line.
 */
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Window
 
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
@@ -24,15 +22,15 @@ import org.kde.kirigami as Kirigami
 PlasmoidItem {
     id: root
 
+    readonly property bool vertical: Plasmoid.formFactor === PlasmaCore.Types.Vertical
     readonly property var now: timeSource.item ? timeSource.item.dateTime : new Date()
     readonly property var locale: Qt.locale(Plasmoid.configuration.localeName || Qt.locale().name)
-    readonly property string text: formatClock(now)
+    readonly property string timeText: formatTime(now)
+    readonly property string dateText: Plasmoid.configuration.showDate
+        ? now.toLocaleDateString(locale, Plasmoid.configuration.dateFormat) : ""
 
     preferredRepresentation: fullRepresentation
     Plasmoid.backgroundHints: PlasmaCore.Types.NoBackground
-    // Same mechanism as Plasma's own flexible spacer: take all free panel width.
-    Layout.fillWidth: true
-    Layout.fillHeight: true
 
     toolTipMainText: now.toLocaleDateString(locale, Locale.LongFormat)
 
@@ -52,125 +50,87 @@ PlasmoidItem {
         return n < 10 ? "0" + n : String(n);
     }
 
-    function formatClock(d): string {
+    function formatTime(d): string {
         const minutes = pad(d.getMinutes());
-        let time;
         if (Plasmoid.configuration.twentyFourHour) {
-            time = pad(d.getHours()) + ":" + minutes;
-        } else {
-            const h = d.getHours() % 12 || 12;
-            time = h + ":" + minutes + " " + (d.getHours() < 12 ? "A" : "P");
+            return pad(d.getHours()) + ":" + minutes;
         }
-        if (!Plasmoid.configuration.showDate) {
-            return time;
-        }
-        const month = root.locale.monthName(d.getMonth(), Locale.ShortFormat).replace(".", "");
-        return month + " " + d.getDate() + " · " + time;
+        const time = (d.getHours() % 12 || 12) + ":" + minutes;
+        return Plasmoid.configuration.showAmPm ? time + " " + (d.getHours() < 12 ? "A" : "P") : time;
     }
 
-    fullRepresentation: Item {
-        id: band
+    fullRepresentation: MouseArea {
+        id: area
 
-        property real textX: 0
-        property var watched: []
+        // Applet thickness = panel thickness minus the Breeze panel margins
+        // (44px vertical bar → 36px wide, 30px horizontal bar → 22px tall).
+        readonly property int thickness: Math.max(16, Math.round(root.vertical ? root.width : root.height))
+        readonly property int textSize: Math.round(thickness * (root.vertical ? Plasmoid.configuration.fontScale : 0.6))
 
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        Layout.minimumWidth: clockArea.width
-        Layout.preferredWidth: clockArea.width
+        Layout.minimumWidth: root.vertical ? 0 : content.implicitWidth + 16
+        Layout.preferredWidth: root.vertical ? -1 : content.implicitWidth + 16
+        Layout.maximumWidth: root.vertical ? Infinity : content.implicitWidth + 16
+        Layout.minimumHeight: root.vertical ? content.implicitHeight + 10 : 0
+        Layout.preferredHeight: root.vertical ? content.implicitHeight + 10 : -1
+        Layout.maximumHeight: root.vertical ? content.implicitHeight + 10 : Infinity
+        Layout.fillWidth: root.vertical
+        Layout.fillHeight: !root.vertical
 
-        // Put the text at the panel window's horizontal center (the panel
-        // spans the whole screen, so that is the screen center), clamped
-        // so it never overlaps the neighbouring widgets.
-        function recenter(): void {
-            const win = band.Window.window;
-            if (!win || band.width <= 0) {
-                return;
-            }
-            const origin = band.mapToItem(null, 0, 0);
-            const wanted = win.width / 2 - origin.x - clockArea.width / 2;
-            band.textX = Math.round(Math.max(0, Math.min(band.width - clockArea.width, wanted)));
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: calendar.toggle()
+
+        Rectangle {
+            anchors.fill: parent
+            radius: 5
+            visible: area.containsMouse || calendar.shown
+            color: calendar.shown ? Kirigami.Theme.highlightColor
+                                  : Qt.tint(Kirigami.Theme.backgroundColor, Qt.alpha(Kirigami.Theme.highlightColor, 0.55))
         }
 
-        function queueRecenter(): void {
-            Qt.callLater(band.recenter);
-        }
-
-        // Our x inside the panel changes whenever a widget on the left grows
-        // or shrinks; those changes arrive as x/width changes on our
-        // ancestors, so listen to them (no timers, no polling).
-        function watchAncestors(): void {
-            unwatchAncestors();
-            for (let p = band.parent; p; p = p.parent) {
-                p.xChanged.connect(band.queueRecenter);
-                p.widthChanged.connect(band.queueRecenter);
-                band.watched.push(p);
-            }
-        }
-
-        function unwatchAncestors(): void {
-            for (const p of band.watched) {
-                p.xChanged.disconnect(band.queueRecenter);
-                p.widthChanged.disconnect(band.queueRecenter);
-            }
-            band.watched = [];
-        }
-
-        onWidthChanged: queueRecenter()
-        onXChanged: queueRecenter()
-        onParentChanged: {
-            watchAncestors();
-            queueRecenter();
-        }
-        Component.onCompleted: {
-            watchAncestors();
-            queueRecenter();
-        }
-        Component.onDestruction: unwatchAncestors()
-
-        Connections {
-            target: band.Window.window
-            function onWidthChanged() {
-                band.queueRecenter();
-            }
-        }
-
-        MouseArea {
-            id: clockArea
-
-            x: band.textX
-            width: label.implicitWidth + 16
-            height: parent.height
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onWidthChanged: band.queueRecenter()
-            onClicked: calendar.toggle()
-
-            Rectangle {
-                anchors.centerIn: parent
-                width: parent.width
-                height: parent.height
-                radius: 5
-                visible: clockArea.containsMouse || calendar.shown
-                color: calendar.shown ? Kirigami.Theme.highlightColor
-                                      : Qt.tint(Kirigami.Theme.backgroundColor, Qt.alpha(Kirigami.Theme.highlightColor, 0.55))
-            }
+        // Vertical: time over date. Horizontal: "10/31 · 1:38" on one line.
+        Grid {
+            id: content
+            anchors.centerIn: parent
+            columns: root.vertical ? 1 : 3
+            columnSpacing: 6
+            horizontalItemAlignment: Grid.AlignHCenter
 
             Text {
-                id: label
-                anchors.centerIn: parent
-                text: root.text
+                visible: !root.vertical && root.dateText.length > 0
+                text: root.dateText
                 color: Kirigami.Theme.textColor
                 font.family: Plasmoid.configuration.fontFamily || Kirigami.Theme.defaultFont.family
-                font.pixelSize: Math.round(root.height * Plasmoid.configuration.fontScale)
-                font.letterSpacing: Plasmoid.configuration.letterSpacing
+                font.pixelSize: area.textSize
+                renderType: Text.NativeRendering
+            }
+            Text {
+                visible: !root.vertical && root.dateText.length > 0
+                text: "·"
+                color: Kirigami.Theme.disabledTextColor
+                font.pixelSize: area.textSize
+                renderType: Text.NativeRendering
+            }
+            Text {
+                text: root.timeText
+                color: Kirigami.Theme.textColor
+                font.family: Plasmoid.configuration.fontFamily || Kirigami.Theme.defaultFont.family
+                font.pixelSize: area.textSize
+                renderType: Text.NativeRendering
+            }
+            Text {
+                visible: root.vertical && root.dateText.length > 0
+                text: root.dateText
+                color: Kirigami.Theme.textColor
+                font.family: Plasmoid.configuration.fontFamily || Kirigami.Theme.defaultFont.family
+                font.pixelSize: area.textSize
                 renderType: Text.NativeRendering
             }
         }
 
         CalendarPopup {
             id: calendar
-            anchorItem: clockArea
+            anchorItem: area
             today: root.now
         }
     }

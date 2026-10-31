@@ -1,9 +1,9 @@
 # Empire Plasma — Mist Edition
 
 Dotfiles minimalistas para **CachyOS + KDE Plasma 6**, pensados para un PC de juego (Age of Empires II: DE, Steam, OBS).
-Una sola barra superior fina y opaca, colores sacados del wallpaper del bosque con niebla, y nada que consuma CPU en segundo plano.
+Una sola barra vertical a la izquierda, fina y opaca, con colores sacados del wallpaper del bosque con niebla, y nada que consuma CPU en segundo plano.
 
-![Vista previa: barra superior sobre el wallpaper](docs/preview.jpg)
+![Vista previa: barra vertical sobre el wallpaper](docs/preview.jpg)
 
 ![Vista previa con el calendario y el menú de apagado abiertos](docs/preview-popups.jpg)
 
@@ -15,16 +15,21 @@ Una sola barra superior fina y opaca, colores sacados del wallpaper del bosque c
 
 ## Qué hace
 
+Barra vertical de 44 px en el borde izquierdo, de arriba abajo:
+
 | Zona | Contenido | Componente |
 |---|---|---|
-| Izquierda | Logo de Arch (azul niebla) → lanzador de apps | Kickoff nativo con icono propio |
-| | `I II III` (Dark / Feudal / Castle Age) | **Empire Ages** (QML propio) |
-| | Apps ancladas, monocromas, con punto si están abiertas | **Empire Launchers** (QML propio) |
-| | Música: título + ⏮ ⏯ ⏭, se oculta si no suena nada | **Empire Media** (QML propio) |
-| Centro | `Oct 26 · 4:27 P`, centrado en la pantalla, clic → calendario | **Empire Clock** (QML propio) |
-| Derecha | Bandeja: Steam, Discord, Dropbox, Nextcloud… | Bandeja del sistema nativa |
-| | `US`/`ES` · Bluetooth · Wi-Fi/red · Volumen · Notificaciones | Applets nativos de Plasma |
-| | ⏻ → Bloquear, Suspender, Cerrar sesión, Reiniciar, Apagar | **Empire Power** (QML propio) |
+| Arriba | Logo de Arch (azul niebla) → lanzador de apps | Kickoff nativo con icono propio |
+| | `I` `II` `III` apilados (Dark / Feudal / Castle Age) | **Empire Ages** (QML propio) |
+| | Apps ancladas y abiertas, con **su icono original** | Gestor de tareas nativo de Plasma |
+| Medio | Espacio libre | Espaciador nativo |
+| Abajo | Bandeja: Steam, Discord, Bluetooth, Dropbox, Nextcloud… | Bandeja del sistema nativa |
+| | Teclado · Wi-Fi/red · Volumen · Batería (solo si hay) | Applets nativos de Plasma |
+| | Hora sobre fecha (`1:38` / `10/31`), clic → calendario | **Empire Clock** (QML propio) |
+| | Notificaciones | Applet nativo de Plasma |
+| | ⏻ al final de todo → Bloquear, Suspender, Cerrar sesión, Reiniciar, Apagar | **Empire Power** (QML propio) |
+
+El indicador de teclado muestra lo que tengas configurado en el sistema: el instalador no toca tus distribuciones de teclado. Los iconos de las apps son los que trae cada app; el tema no les cambia el color.
 
 Además:
 
@@ -34,7 +39,7 @@ Además:
 - **Prompt** para bash, zsh y fish: `Λ ~/proyectos ›`. Si un comando falla, muestra el código: `Λ ~/proyectos ×127 ›`.
 - **Escritorios virtuales:** exactamente tres, llamados *Dark Age*, *Feudal Age* y *Castle Age*. Los nombres solo aparecen en tooltips, en Vista general y en el OSD. La barra solo muestra los números romanos.
 
-No se tocan: wallpaper, kernel, drivers, Steam, Proton, Gamescope, OBS, energía, arranque, servicios, tema de iconos ni fuentes del sistema.
+No se tocan: wallpaper, distribuciones de teclado, iconos de las apps, kernel, drivers, Steam, Proton, Gamescope, OBS, energía, arranque, servicios ni fuentes del sistema.
 
 ### Paleta
 
@@ -82,9 +87,9 @@ cd empire-plasma
 
 El instalador sigue estos pasos:
 
-1. **Detecta** la versión de CachyOS y de Plasma, si la sesión es Wayland o X11, los monitores, los paneles y escritorios actuales, el esquema de color, si Brave Origin y un adaptador Bluetooth están presentes, tu shell y tus distribuciones de teclado.
+1. **Detecta** la versión de CachyOS y de Plasma, si la sesión es Wayland o X11, los monitores, los paneles y escritorios actuales, el esquema de color, si Brave Origin está instalado, si hay batería y tu shell.
 2. **Muestra** la lista completa de cambios.
-3. **Pregunta** antes de aplicar nada. Además pregunta aparte antes de *borrar tus paneles actuales*, de quitar escritorios sobrantes y de configurar el teclado.
+3. **Pregunta** antes de aplicar nada. Además pregunta aparte antes de *borrar tus paneles actuales* y de quitar escritorios sobrantes.
 4. **Hace una copia de seguridad** en `~/.local/share/empire-plasma/backups/<fecha>/`. La primera copia queda marcada como *original*: aunque reinstales, `restore.sh` vuelve siempre a tu escritorio de antes de Empire.
 5. **Aplica** los cambios y reinicia `plasmashell` una vez (la pantalla parpadea un segundo).
 6. **Verifica** lo que se puede comprobar con un script (ver abajo) e informa de cualquier fallo.
@@ -97,10 +102,8 @@ Opciones:
 --keep-panels    añadir la barra sin quitar los paneles actuales
 --no-panel       solo tema, KWin, Konsole y prompt
 --no-shell       no tocar bash/zsh/fish
---no-keyboard    no tocar distribuciones de teclado
 --no-desktops    no cambiar número/nombres de escritorios
---layouts us,es  distribuciones si no tienes ninguna configurada (p. ej. us,latam)
---thickness 30   grosor de la barra en px (26–36)
+--thickness 44   ancho de la barra en px (36–64)
 ```
 
 ### Restaurar
@@ -130,11 +133,10 @@ La prioridad es usar componentes nativos. Solo hay QML propio donde Plasma no of
 | Widget | Por qué no basta el nativo | Coste en ejecución |
 |---|---|---|
 | **Empire Ages** | El *Paginador* dibuja escritorios en miniatura con contornos de ventanas. No tiene un modo "solo números romanos con cápsula y subrayado". | Señales de KWin vía `libtaskmanager`. Al hacer clic, una llamada D-Bus asíncrona. Sin temporizadores. |
-| **Empire Launchers** | El *Gestor de tareas de solo iconos* siempre pinta los iconos originales a color. Cambiar el tema de iconos alteraría todo el sistema. | El mismo `TasksModel` del gestor de tareas. El tinte monocromo es un `MultiEffect` estático: se renderiza una vez por icono. |
-| **Empire Media** | El *Reproductor multimedia* en un panel es solo un icono; título y controles van en un popup. | El mismo modelo MPRIS que el widget nativo (`libkmpris`): señales D-Bus, sin sondeo y sin procesos extra. Se oculta sin reproductor. |
-| **Empire Clock** | Un reloj entre dos espaciadores queda centrado *entre los grupos*, no en la pantalla, y se mueve cuando la música aparece o desaparece. El *Reloj digital* tampoco sabe escribir `A`/`P` con una sola letra. | Un tic por minuto, del mismo origen que el reloj nativo (`org.kde.plasma.clock` en Plasma ≥ 6.6; motor `time` en versiones anteriores). El recentrado solo se ejecuta cuando cambia el ancho de algo. El calendario es el `MonthView` de KDE y se crea al abrirlo por primera vez. |
+| **Empire Clock** | En formato de 12 horas, el *Reloj digital* siempre añade "AM/PM" (`1:38 PM`), que no cabe en una barra estrecha ni es el aspecto pedido (`1:38` sobre `10/31`). | Un tic por minuto, del mismo origen que el reloj nativo (`org.kde.plasma.clock` en Plasma ≥ 6.6; motor `time` en versiones anteriores). El calendario es el `MonthView` de KDE y se crea al abrirlo por primera vez. |
 | **Empire Power** | *Bloquear/Cerrar sesión* pone un icono por acción. | `SessionManagement` de Plasma. Reiniciar y apagar muestran la confirmación nativa. |
-| **Empire Separator** | El *Espaciador* solo añade hueco, no dibuja línea. | Un rectángulo de 1 px. |
+
+Todo lo demás es nativo: el lanzador, las apps (con su indicador de app abierta y activa, y los avisos de notificación), la bandeja, el teclado, la red, el volumen, la batería y las notificaciones.
 
 Todos leen sus colores del esquema de color: si lo cambias, la barra cambia con él. No hay colores fijos en el QML.
 
@@ -142,27 +144,15 @@ Todos leen sus colores del esquema de color: si lo cambias, la barra cambia con 
 
 ## Uso diario
 
-### Aplicaciones ancladas
+### Aplicaciones
 
-- **Anclar:** arrastra una app desde el menú Arch hasta los iconos de la barra. También funciona *clic derecho → Pin* sobre una app abierta (si activas "mostrar apps no ancladas").
-- **Desanclar:** *clic derecho → Unpin*.
-- **Lista manual:** *clic derecho → Configure Launchers…*. Escribe un ID por línea; basta `org.kde.dolphin`.
+Es el gestor de tareas de Plasma, así que funciona como siempre:
 
-IDs habituales:
+- **Anclar:** clic derecho sobre una app abierta → *Anclar al gestor de tareas*, o arrástrala desde el menú de Arch hasta la barra.
+- **Desanclar:** clic derecho → *Desanclar del gestor de tareas*.
+- La app activa lleva fondo y una línea en el borde izquierdo; las abiertas, un indicador pequeño. Los avisos de notificación aparecen sobre el icono.
 
-```
-org.kde.dolphin
-org.kde.konsole
-steam
-discord                     # Flatpak: com.discordapp.Discord
-spotify-launcher            # o spotify / com.spotify.Client
-com.obsproject.Studio
-```
-
-Para saber el ID exacto: `ls /usr/share/applications ~/.local/share/applications /var/lib/flatpak/exports/share/applications`.
 Al inicio solo se ancla Brave Origin, y solo si el instalador lo encuentra.
-
-Controles: clic izquierdo abre o enfoca la app, y vuelve a minimizarla si ya está enfocada. Clic central abre una ventana nueva. Si hay varias ventanas, cada clic pasa a la siguiente.
 
 ### Escritorios
 
@@ -170,7 +160,7 @@ Clic en `I`, `II` o `III`. La rueda del ratón sobre los números también cambi
 
 ### Teclado
 
-Clic en `US`/`ES` para alternar. Por defecto se configura *us,es* (España). Para Latinoamérica: `./install.sh --layouts us,latam`. Si ya tenías distribuciones configuradas, se conservan y solo cambian las etiquetas a mayúsculas.
+El indicador muestra y alterna las distribuciones que tengas en *Preferencias del sistema → Teclado*. El tema no las cambia.
 
 ---
 
@@ -196,25 +186,23 @@ Los colores de Konsole están en `config/konsole/EmpireMist.colorscheme`. Los de
 
 **Tamaños:**
 
-- **Grosor de la barra:** `./install.sh --thickness 28`, o *clic derecho en la barra → Mostrar configuración del panel → Altura*.
-- **Iconos de las apps ancladas:** *Configure Launchers… → Icon size*. Es un porcentaje de la altura útil del widget. Plasma deja 4 px arriba y abajo, así que en una barra de 30 px esa altura es de 22 px; por defecto 100 % = 22 px.
+- **Ancho de la barra:** `./install.sh --thickness 48`, o *clic derecho en la barra → Mostrar configuración del panel → Ancho*. Plasma deja 4 px a cada lado, así que en una barra de 44 px cada widget tiene 36 px; los números romanos, el reloj y el apagado se escalan con ese ancho.
 - **Ajustes guardados por widget** en `~/.config/plasma-org.kde.plasma.desktop-appletsrc` (se aplican al reiniciar Plasma: `systemctl --user restart plasma-plasmashell`):
 
 | Widget | Clave | Por defecto | Qué hace |
 |---|---|---|---|
-| Empire Clock | `fontScale` | `0.6` | Tamaño del texto respecto a la altura del widget (≈ 13 px en una barra de 30 px) |
-| Empire Clock | `letterSpacing` | `0.6` | Espaciado entre letras |
-| Empire Clock | `localeName` | `en_US` | Idioma de los meses: `es_ES` da `oct` |
+| Empire Clock | `dateFormat` | `M/d` | Formato de la fecha: `M/d` da `10/31`, `d/M` da `31/10` |
 | Empire Clock | `twentyFourHour` | `false` | Formato de 24 horas |
+| Empire Clock | `showAmPm` | `false` | Añade `A` o `P` a la hora (`1:38 P`) |
+| Empire Clock | `fontScale` | `0.34` | Tamaño del texto respecto al ancho del widget (≈ 12 px en una barra de 44 px) |
 | Empire Ages | `fontFamily` | `serif` | Fuente de los números romanos (vacío = fuente de Plasma) |
-| Empire Media | `maxTitleWidth` | `220` | Ancho máximo del título antes de recortarlo, en px |
 
 ---
 
 ## Rendimiento
 
 - No se instala nada que se quede ejecutándose: ni barra externa, ni Conky, ni monitores, ni scripts en bucle.
-- Ningún widget sondea. Todos reaccionan a señales: KWin, MPRIS, el `TasksModel` y un tic de reloj por minuto.
+- Ningún widget sondea. Todos reaccionan a señales: KWin, la sesión de Plasma y un tic de reloj por minuto.
 - El compositor queda como estaba. Solo se desactivan blur, background contrast, translucency, wobbly windows y magic lamp. Los juegos a pantalla completa siguen pasando por KWin igual que antes. En Wayland, KWin ya usa scan-out directo para pantalla completa.
 - **No prometo más FPS.** Quitar blur y transparencias reduce trabajo del compositor en el escritorio, pero no he medido diferencias en juegos. Si quieres datos, compara con MangoHud antes y después.
 
@@ -225,29 +213,31 @@ Los colores de Konsole están en `config/konsole/EmpireMist.colorscheme`. Los de
 **Comprobado aquí** (contenedor Linux sin escritorio, con las herramientas KDE simuladas):
 
 - `shellcheck` sin avisos en `install.sh`, `restore.sh`, `lib/common.sh` y el prompt de bash.
-- Todos los `.qml` pasan el analizador de Qt 6.9 (`qmllint`) sin errores de sintaxis.
-- El script de la barra crea el orden de widgets correcto y configura el panel arriba, a 30 px, opaco, sin flotar, y la bandeja (probado contra una simulación de la API de scripting de Plasma).
-- El formato del reloj: `Oct 26 · 4:27 P`, `12:05 A`, `12:00 P`; y los números romanos `I II III IV V IX XII`.
+- Los widgets propios se ejecutaron en un motor Qt 6.9 real, dentro de una barra simulada de 44 px que copia las reglas de tamaño del panel de Plasma 6.4, con clics de ratón reales (30/30 comprobaciones):
+  - `I II III` apilados justo debajo del logo, de 36 × 24 px, con números de 12 px; el clic cambia de escritorio en KWin;
+  - el reloj muestra dos líneas centradas (`4:27` sobre `10/26`), cabe en 36 px y abre el calendario a la derecha de la barra;
+  - el apagado es lo último de la barra, su menú se abre a la derecha y cada opción llega a la sesión de Plasma;
+  - nada se solapa y no hay avisos de QML.
+- En Plasma 6.0–6.5 el reloj usa la fuente de hora anterior y funciona.
+- El script de la barra crea el panel a la izquierda, opaco, sin flotar, con los widgets en este orden: Arch · I II III · apps · espacio · bandeja · teclado · red · volumen · (batería) · reloj · notificaciones · apagado.
 - Ciclo completo *instalar → reinstalar → restaurar* en un HOME temporal con herramientas KDE simuladas:
-  - el wallpaper no se toca;
+  - el wallpaper no se toca y el teclado tampoco;
   - los escritorios pasan de 4 a 3 y vuelven a 4 con sus nombres;
   - la reinstalación conserva la copia original;
   - tras restaurar, el HOME queda **idéntico byte a byte**.
 - Los prompts de bash, zsh 5.9 y fish 3.7 se renderizan bien, también con código de error.
-- Las APIs usadas se revisaron contra el código fuente de Plasma 6.2, 6.4, 6.5, 6.6 y master: scripting de paneles, `VirtualDesktopInfo`, `Mpris2Model`, `SessionManagement`, `MonthView`, `Dialog` y el módulo D-Bus de QML.
+- Las APIs usadas se revisaron contra el código fuente de Plasma 6.2, 6.4, 6.5, 6.6 y master.
 
 **Por comprobar en tu PC.** Ningún script puede verlo; el instalador te lo recuerda. Marca cada punto:
 
-- [ ] La barra es fina, completamente opaca y sin bordes llamativos.
-- [ ] El reloj sigue centrado en la pantalla al empezar y al parar la música.
-- [ ] `I`, `II` y `III` cambian de escritorio; la cápsula sigue al escritorio activo.
+- [ ] La barra está a la izquierda, es fina, completamente opaca y sin bordes llamativos.
 - [ ] El logo de Arch abre el lanzador.
-- [ ] Brave Origin abre desde su icono (si está instalado).
-- [ ] La música se pausa y se reanuda desde el módulo; el módulo desaparece al cerrar el reproductor.
+- [ ] `I`, `II` y `III` cambian de escritorio; la cápsula sigue al escritorio activo.
+- [ ] Las apps muestran su icono original; la activa se distingue; anclar y desanclar funciona.
 - [ ] La bandeja muestra Steam, Discord y similares cuando están abiertos.
-- [ ] Bluetooth, Wi-Fi, volumen y el cambio `US`/`ES` funcionan.
-- [ ] El clic en el reloj abre el calendario, y `Esc` lo cierra.
-- [ ] ⏻ bloquea, cierra sesión, reinicia y apaga (con confirmación).
+- [ ] Teclado, Wi-Fi, volumen y batería (si hay) funcionan.
+- [ ] El reloj muestra hora y fecha; el clic abre el calendario, y `Esc` lo cierra.
+- [ ] ⏻ está al final de todo y bloquea, cierra sesión, reinicia y apaga (con confirmación).
 - [ ] No hay iconos cortados ni desalineados.
 - [ ] Steam, AoE II: DE y OBS (captura de pantalla y de juego) funcionan igual que antes.
 - [ ] `./restore.sh` devuelve tu escritorio anterior.
@@ -270,13 +260,13 @@ empire-plasma/
 │   └── shell/                  prompt.bash · prompt.zsh · prompt.fish
 ├── plasma/
 │   ├── layout/empire-panel.js  la barra, con la API de scripting de Plasma 6
-│   └── plasmoids/              los 6 widgets Empire (QML)
+│   └── plasmoids/              los 3 widgets Empire (QML): ages, clock, power
 └── docs/                       imágenes de vista previa
 ```
 
 ## Solución de problemas
 
-- **Aparece un widget como "no disponible":** tu Plasma no incluye ese applet. Por ejemplo, sin `bluez` no hay applet de Bluetooth. La barra se crea igualmente sin él.
+- **Aparece un widget como "no disponible":** tu Plasma no incluye ese applet. La barra se crea igualmente sin él.
 - **La barra vieja sigue ahí:** respondiste "no" a reemplazar paneles. Bórrala con *clic derecho → Mostrar configuración del panel → Más opciones → Eliminar panel*.
 - **El indicador I II III no cambia de escritorio:** necesita Plasma ≥ 6.2, que trae el módulo QML `org.kde.plasma.workspace.dbus`.
 - **CachyOS muestra fastfetch al abrir fish:** es el saludo de CachyOS, no de este tema. Para quitarlo, añade `function fish_greeting; end` a `~/.config/fish/config.fish`.

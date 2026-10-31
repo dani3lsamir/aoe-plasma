@@ -7,7 +7,7 @@
             }
         ],
         "Category": "System Information",
-        "Description": "Single power icon with a native menu: lock, log out, restart, shut down.",
+        "Description": "Single power icon at the end of the bar with a native menu: lock, sleep, log out, restart, shut down.",
         "Icon": "system-shutdown-symbolic",
         "Id": "org.empire.mist.power",
         "License": "MIT",

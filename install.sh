@@ -16,10 +16,8 @@ DRY_RUN=0
 DO_PANEL=1
 REPLACE_PANELS=1
 DO_SHELL=1
-DO_KEYBOARD=1
 DO_DESKTOPS=1
-THICKNESS=30
-KB_LAYOUTS="${EMPIRE_KB_LAYOUTS:-us,es}"
+THICKNESS=44
 AGE_NAMES=("Dark Age" "Feudal Age" "Castle Age")
 
 usage() {
@@ -33,10 +31,11 @@ Usage: ./install.sh [options]
   --keep-panels      Add the Empire bar but do not remove existing panels.
   --no-panel         Do not create the bar (colors, KWin, Konsole, prompt only).
   --no-shell         Do not add the prompt to any shell.
-  --no-keyboard      Do not touch keyboard layouts.
   --no-desktops      Do not change the number/names of virtual desktops.
-  --layouts LIST     Keyboard layouts when none are configured (default: $KB_LAYOUTS).
-  --thickness PX     Bar thickness in pixels, 26–36 (default: $THICKNESS).
+  --thickness PX     Width of the vertical bar in pixels, 36–64 (default: $THICKNESS).
+
+Keyboard layouts are never touched: the indicator shows whatever your
+system is configured with (System Settings → Keyboard).
   -h, --help         This help.
 EOF
 }
@@ -48,19 +47,16 @@ while (( $# )); do
         --keep-panels) REPLACE_PANELS=0 ;;
         --no-panel) DO_PANEL=0 ;;
         --no-shell) DO_SHELL=0 ;;
-        --no-keyboard) DO_KEYBOARD=0 ;;
         --no-desktops) DO_DESKTOPS=0 ;;
-        --layouts) KB_LAYOUTS=${2:?--layouts needs a value}; shift ;;
         --thickness) THICKNESS=${2:?--thickness needs a value}; shift ;;
         -h|--help) usage; exit 0 ;;
         *) usage; die "Unknown option: $1" ;;
     esac
     shift
 done
-if ! [[ $THICKNESS =~ ^[0-9]+$ ]] || (( THICKNESS < 26 || THICKNESS > 36 )); then
-    die "--thickness must be 26–36"
+if ! [[ $THICKNESS =~ ^[0-9]+$ ]] || (( THICKNESS < 36 || THICKNESS > 64 )); then
+    die "--thickness must be 36–64"
 fi
-[[ $KB_LAYOUTS =~ ^[a-z]+(,[a-z]+)*$ ]] || die "--layouts must look like us,es"
 
 # ════════════════════════════════════════════════════════════════════════
 # 1. Detection (read-only)
@@ -129,22 +125,18 @@ done
 if [[ -n $BRAVE_ID ]]; then
     info "Brave Origin: found ($BRAVE_ID) — it will be pinned"
 else
-    info "Brave Origin: not installed — the pinned-apps row starts empty"
+    info "Brave Origin: not installed — no app is pinned at first"
 fi
 
-HAS_BLUETOOTH=0
-compgen -G "/sys/class/bluetooth/hci*" >/dev/null && HAS_BLUETOOTH=1
-info "Bluetooth adapter: $([[ $HAS_BLUETOOTH == 1 ]] && echo yes || echo 'none (indicator skipped)')"
+HAS_BATTERY=0
+compgen -G "/sys/class/power_supply/BAT*" >/dev/null && HAS_BATTERY=1
+info "Battery: $([[ $HAS_BATTERY == 1 ]] && echo 'yes (shown in the bar)' || echo 'none (no battery icon)')"
 
 MONO_FONT="monospace"
 for f in "JetBrains Mono" "Hack" "Fira Code" "Noto Sans Mono" "DejaVu Sans Mono"; do
     if fc-list -q "$f" 2>/dev/null; then MONO_FONT=$f; break; fi
 done
 info "Terminal font: $MONO_FONT"
-
-KB_CURRENT=$(kread kxkbrc Layout LayoutList)
-[[ $KB_CURRENT == "$UNSET" ]] && KB_CURRENT=""
-info "Keyboard layouts: ${KB_CURRENT:-none configured (system default)}"
 
 LOGIN_SHELL=$(basename "${SHELL:-bash}")
 info "Login shell: $LOGIN_SHELL"
@@ -159,14 +151,6 @@ fi
 LAUNCHERS_JSON="[]"
 [[ -n $BRAVE_ID ]] && LAUNCHERS_JSON="[\"applications:$BRAVE_ID\"]"
 
-if [[ -n $KB_CURRENT ]]; then
-    KB_TARGET=$KB_CURRENT
-else
-    KB_TARGET=$KB_LAYOUTS
-fi
-KB_LABEL=${KB_TARGET^^}
-KB_LABEL=${KB_LABEL//,/\/}
-
 step "Planned changes"
 say "  Theme"
 info "Color scheme 'Empire Mist' (#101820 / #253846 / #B8D5E0) for Plasma and apps"
@@ -175,19 +159,15 @@ info "KWin: blur, background contrast, translucency, wobbly and magic lamp effec
 info "Konsole profile 'Empire Mist' as default (font: $MONO_FONT, no transparency)"
 info "Wallpaper: untouched"
 if [[ $DO_PANEL == 1 ]]; then
-    say "  Top bar (${THICKNESS}px, opaque, not floating)"
-    info "Arch menu │ I II III │ pinned apps │ music      clock      tray │ ${KB_LABEL} BT Wi-Fi Vol Notif ⏻"
+    say "  Vertical bar on the left (${THICKNESS}px wide, opaque, not floating), top → bottom:"
+    info "Arch menu · I II III · apps (original icons) · … · tray · keyboard · network · volume$([[ $HAS_BATTERY == 1 ]] && echo ' · battery') · clock · notifications · power"
     if [[ $REPLACE_PANELS == 1 && $PANEL_COUNT -gt 0 ]]; then
         info "Removes your $PANEL_COUNT current panel(s), dock included (asked separately, backed up)"
     fi
 fi
 [[ $DO_DESKTOPS == 1 ]] && say "  Virtual desktops" && info "Exactly 3: I Dark Age · II Feudal Age · III Castle Age (now: $DESKTOP_COUNT)"
-if [[ $DO_KEYBOARD == 1 ]]; then
-    say "  Keyboard"
-    if [[ -z $KB_CURRENT ]]; then info "Layouts ${KB_LABEL} (click the indicator to switch)"; else info "Keeps your layouts ($KB_CURRENT); only the labels become ${KB_LABEL}"; fi
-fi
 [[ $DO_SHELL == 1 ]] && say "  Shell" && info "Minimal prompt  Λ ~/dir ›  for $LOGIN_SHELL (one marked block in its rc file)"
-say "  Not touched: kernel, drivers, Steam, Proton, Gamescope, OBS, power settings, boot, services, icons, fonts, wallpaper"
+say "  Not touched: keyboard layouts, app icons, kernel, drivers, Steam, Proton, Gamescope, OBS, power settings, boot, services, fonts, wallpaper"
 
 if [[ $DRY_RUN == 1 ]]; then
     step "Dry run: nothing was changed."
@@ -204,11 +184,6 @@ if [[ $DO_PANEL == 1 && $REPLACE_PANELS == 1 && $PANEL_COUNT -gt 0 ]]; then
             DO_PANEL=0
         fi
     fi
-fi
-
-KB_WRITE_LIST=0
-if [[ $DO_KEYBOARD == 1 && -z $KB_CURRENT ]]; then
-    ask "Configure keyboard layouts ${KB_LABEL}?" y && KB_WRITE_LIST=1
 fi
 
 if [[ $DO_DESKTOPS == 1 && $DESKTOP_COUNT =~ ^[0-9]+$ && $DESKTOP_COUNT -gt 3 ]]; then
@@ -256,7 +231,7 @@ backup_file() {  # path relative to $HOME
 
 cfg_rel() { local p="$CONFIG_HOME/$1"; printf '%s' "${p#"$HOME"/}"; }
 
-for f in kdeglobals kwinrc breezerc plasmarc konsolerc kxkbrc plasmashellrc \
+for f in kdeglobals kwinrc breezerc plasmarc konsolerc plasmashellrc \
          plasma-org.kde.plasma.desktop-appletsrc; do
     backup_file "$(cfg_rel "$f")"
 done
@@ -317,6 +292,13 @@ sed "s/@EMPIRE_MONO_FONT@/$MONO_FONT/" "$REPO_DIR/config/konsole/EmpireMist.prof
 track "$DATA_HOME/konsole/EmpireMist.colorscheme"
 track "$DATA_HOME/konsole/EmpireMist.profile"
 
+# Drop widgets an earlier version installed that this version no longer ships.
+while IFS= read -r path; do
+    if [[ $path == "$DATA_HOME/plasma/plasmoids/"* && ! -d "$REPO_DIR/plasma/plasmoids/$(basename "$path")" ]]; then
+        rm -rf -- "$path"
+        sed -i "\|^$path\$|d" "$INSTALLED"
+    fi
+done < <(cat "$INSTALLED")
 for pkg in "$REPO_DIR"/plasma/plasmoids/*/; do
     id=$(basename "$pkg")
     rm -rf "$DATA_HOME/plasma/plasmoids/$id"
@@ -353,17 +335,6 @@ ok "KWin: Breeze decoration, tiny borders, no blur / transparency effects"
 set_key konsolerc "Desktop Entry" DefaultProfile EmpireMist.profile
 ok "Konsole: Empire Mist profile is the default for new windows"
 
-if [[ $DO_KEYBOARD == 1 ]]; then
-    if [[ $KB_WRITE_LIST == 1 ]]; then
-        set_key kxkbrc Layout LayoutList "$KB_TARGET"
-        set_key kxkbrc Layout Use true
-    fi
-    if [[ $KB_WRITE_LIST == 1 || -n $KB_CURRENT ]]; then
-        set_key kxkbrc Layout DisplayNames "${KB_TARGET^^}"
-        ok "Keyboard: ${KB_LABEL}"
-    fi
-fi
-
 if [[ $DO_DESKTOPS == 1 ]]; then
     kwin_set_desktops "${AGE_NAMES[@]}" >/dev/null
     ok "Virtual desktops: $(kwin_desktop_count) — $(kwin_desktops | cut -f2 | paste -sd',' - | sed 's/,/, /g')"
@@ -383,10 +354,10 @@ for s in "${SHELLS[@]}"; do
     ok "Prompt added to $rc (opens in new terminals)"
 done
 
-# ── Top bar ──────────────────────────────────────────────────────────────
+# ── Vertical bar ─────────────────────────────────────────────────────────
 PANEL_ID=""
 if [[ $DO_PANEL == 1 ]]; then
-    step "Building the top bar"
+    step "Building the bar"
     SCRIPT=$(mktemp --suffix=.js)
     trap 'rm -f "$SCRIPT"' EXIT
     json_string() { local s=${1//\\/\\\\}; printf '"%s"' "${s//\"/\\\"}"; }
@@ -394,7 +365,7 @@ if [[ $DO_PANEL == 1 ]]; then
     sed -e "s|@THICKNESS@|$THICKNESS|" \
         -e "s|@KICKOFF_ICON@|$(sed_escape "$(json_string "$EMPIRE_HOME/empire-arch.svg")")|" \
         -e "s|@LAUNCHERS@|$(sed_escape "$LAUNCHERS_JSON")|" \
-        -e "s|@WITH_BLUETOOTH@|$([[ $HAS_BLUETOOTH == 1 ]] && echo true || echo false)|" \
+        -e "s|@WITH_BATTERY@|$([[ $HAS_BATTERY == 1 ]] && echo true || echo false)|" \
         -e "s|@REPLACE_PANELS@|$([[ $REPLACE_PANELS == 1 ]] && echo true || echo false)|" \
         "$REPO_DIR/plasma/layout/empire-panel.js" > "$SCRIPT"
 
@@ -416,11 +387,12 @@ if [[ $DO_PANEL == 1 ]]; then
     kwrite plasmashellrc "$VIEW" panelVisibility 0
     kwrite plasmashellrc "$VIEW>Defaults" thickness "$THICKNESS"
 
-    # Same lists as TRAY_EXTRA / TRAY_HIDDEN / TRAY_KNOWN in plasma/layout/empire-panel.js — keep in sync.
+    # The layout script prints the tray lists it used; write the same ones.
+    tray_list() { grep -o "^EMPIRE_TRAY_$1=.*" <<< "$OUTPUT" | cut -d= -f2-; }
     write_tray() {  # group-path
-        kwrite "$APPLETSRC_NAME" "$1" extraItems "org.kde.plasma.devicenotifier,org.kde.plasma.cameraindicator,org.kde.kdeconnect,org.kde.plasma.clipboard,org.kde.plasma.mediacontroller,org.kde.plasma.battery"
-        kwrite "$APPLETSRC_NAME" "$1" hiddenItems "org.kde.plasma.clipboard,org.kde.plasma.mediacontroller,org.kde.plasma.battery"
-        kwrite "$APPLETSRC_NAME" "$1" knownItems "org.kde.plasma.keyboardlayout,org.kde.plasma.bluetooth,org.kde.plasma.networkmanagement,org.kde.plasma.volume,org.kde.plasma.notifications,org.kde.plasma.devicenotifier,org.kde.plasma.cameraindicator,org.kde.kdeconnect,org.kde.plasma.clipboard,org.kde.plasma.mediacontroller,org.kde.plasma.battery,org.kde.plasma.keyboardindicator,org.kde.plasma.manage-inputmethod,org.kde.plasma.printmanager,org.kde.plasma.vault,org.kde.plasma.weather,org.kde.plasma.brightness,org.kde.plasma.nightcolorcontrol,org.kde.plasma.nightlight,org.kde.kscreen,org.kde.plasma.colorpicker,org.kde.plasma.systemmonitor"
+        kwrite "$APPLETSRC_NAME" "$1" extraItems "$(tray_list EXTRA)"
+        kwrite "$APPLETSRC_NAME" "$1" hiddenItems "$(tray_list HIDDEN)"
+        kwrite "$APPLETSRC_NAME" "$1" knownItems "$(tray_list KNOWN)"
     }
     APPLETSRC_NAME=$(basename "$APPLETSRC")
     if [[ -n $TRAY_ID && $TRAY_ID != 0 ]]; then
@@ -471,8 +443,8 @@ EOF
     RESULT=$(plasma_eval "$VERIFY" || true)
     rm -f "$VERIFY"
     get() { grep -o "^$1=.*" <<< "$RESULT" | cut -d= -f2-; }
-    check "bar is at the top" test "$(get LOCATION)" = top
-    check "bar is ${THICKNESS}px thick" test "$(get HEIGHT)" = "$THICKNESS"
+    check "bar is on the left" test "$(get LOCATION)" = left
+    check "bar is ${THICKNESS}px wide" test "$(get HEIGHT)" = "$THICKNESS"
     if [[ -n $(get OPACITY) && $(get OPACITY) != undefined ]]; then
         check "bar is opaque" test "$(get OPACITY)" = opaque
     else
@@ -480,11 +452,12 @@ EOF
     fi
     check "bar is not floating" test "$(get FLOATING)" = false
     WIDGETS=$(get WIDGETS)
-    for w in org.kde.plasma.kickoff org.empire.mist.ages org.empire.mist.launchers org.empire.mist.media \
-             org.empire.mist.clock org.kde.plasma.systemtray org.kde.plasma.keyboardlayout \
-             org.kde.plasma.networkmanagement org.kde.plasma.volume org.kde.plasma.notifications org.empire.mist.power; do
-        check "widget $w is in the bar" grep -q "$w" <<< "$WIDGETS"
-    done
+    EXPECTED="org.kde.plasma.kickoff,org.empire.mist.ages,org.kde.plasma.icontasks,org.kde.plasma.panelspacer,org.kde.plasma.systemtray,org.kde.plasma.keyboardlayout,org.kde.plasma.networkmanagement,org.kde.plasma.volume"
+    [[ $HAS_BATTERY == 1 ]] && EXPECTED+=",org.kde.plasma.battery"
+    EXPECTED+=",org.empire.mist.clock,org.kde.plasma.notifications,org.empire.mist.power"
+    check "widgets in order: Arch · I II III · apps · space · tray · keyboard · network · volume$([[ $HAS_BATTERY == 1 ]] && echo ' · battery') · clock · notifications · power" \
+        test "$WIDGETS" = "$EXPECTED"
+    [[ $WIDGETS == "$EXPECTED" ]] || info "found: $WIDGETS"
     if grep -qiE 'systemmonitor|weather|cpu|temperature' <<< "$WIDGETS"; then
         warn "FAILED: a monitoring widget is in the bar"; FAILS=$((FAILS + 1))
     else

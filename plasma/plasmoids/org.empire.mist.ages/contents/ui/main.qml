@@ -70,15 +70,22 @@ PlasmoidItem {
     fullRepresentation: MouseArea {
         id: area
 
-        // Sizes are relative to the applet height Plasma gives us: the panel thickness
-        // minus the Breeze panel margins (30px bar → 22px applet).
-        readonly property int capsuleHeight: Math.max(16, Math.round(root.height))
+        readonly property bool vertical: Plasmoid.formFactor === PlasmaCore.Types.Vertical
+        // Plasma gives the applet the panel thickness minus the Breeze panel margins
+        // (4px each side): 44px vertical bar → 36px wide, 30px horizontal bar → 22px tall.
+        readonly property int thickness: Math.max(16, Math.round(vertical ? root.width : root.height))
+        readonly property int capsuleLength: vertical ? Math.round(thickness * 0.66) : thickness
+        readonly property int numeralSize: Math.round((vertical ? thickness * 0.34 : thickness * 0.55))
         property int wheelDelta: 0
 
-        Layout.minimumWidth: row.implicitWidth
-        Layout.preferredWidth: row.implicitWidth
-        Layout.maximumWidth: row.implicitWidth
-        Layout.fillHeight: true
+        Layout.minimumWidth: vertical ? 0 : grid.implicitWidth
+        Layout.preferredWidth: vertical ? -1 : grid.implicitWidth
+        Layout.maximumWidth: vertical ? Infinity : grid.implicitWidth
+        Layout.minimumHeight: vertical ? grid.implicitHeight : 0
+        Layout.preferredHeight: vertical ? grid.implicitHeight : -1
+        Layout.maximumHeight: vertical ? grid.implicitHeight : Infinity
+        Layout.fillWidth: vertical
+        Layout.fillHeight: !vertical
 
         acceptedButtons: Qt.NoButton
         onWheel: wheel => {
@@ -89,9 +96,11 @@ PlasmoidItem {
             }
         }
 
-        Row {
-            id: row
-            anchors.verticalCenter: parent.verticalCenter
+        // I II III side by side in a horizontal bar, stacked in a vertical one.
+        Grid {
+            id: grid
+            anchors.centerIn: parent
+            columns: area.vertical ? 1 : root.count
             spacing: Plasmoid.configuration.spacing
 
             Repeater {
@@ -103,8 +112,8 @@ PlasmoidItem {
                     required property int index
                     readonly property bool isCurrent: index === root.currentIndex
 
-                    width: Math.max(area.capsuleHeight + 6, label.implicitWidth + 16)
-                    height: area.capsuleHeight
+                    width: area.vertical ? area.thickness : Math.max(area.thickness + 6, label.implicitWidth + 16)
+                    height: area.capsuleLength
                     mainText: desktopInfo.desktopNames[index] ?? ""
                     // Tooltip only when KWin has a real name (e.g. "Feudal Age") for this desktop.
                     active: mainText.length > 0 && mainText !== label.text
@@ -126,7 +135,7 @@ PlasmoidItem {
                         text: root.roman(age.index + 1)
                         color: age.isCurrent ? Kirigami.Theme.textColor : Kirigami.Theme.disabledTextColor
                         font.family: Plasmoid.configuration.fontFamily || Kirigami.Theme.defaultFont.family
-                        font.pixelSize: Math.round(area.capsuleHeight * 0.55)
+                        font.pixelSize: area.numeralSize
                         font.weight: age.isCurrent ? Font.DemiBold : Font.Normal
                         renderType: Text.NativeRendering
                     }
@@ -135,7 +144,7 @@ PlasmoidItem {
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.bottom: parent.bottom
                         anchors.bottomMargin: 3
-                        width: Math.round(area.capsuleHeight * 0.45)
+                        width: 10
                         height: 2
                         radius: 1
                         visible: age.isCurrent

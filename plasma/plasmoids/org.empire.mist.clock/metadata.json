@@ -7,7 +7,7 @@
             }
         ],
         "Category": "Date and Time",
-        "Description": "Clock kept at the exact horizontal center of the screen; click for the KDE calendar.",
+        "Description": "Time over date in a vertical bar (one line in a horizontal one); click for the KDE calendar.",
         "Icon": "preferences-system-time",
         "Id": "org.empire.mist.clock",
         "License": "MIT",

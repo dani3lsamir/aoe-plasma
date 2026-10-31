@@ -7,7 +7,7 @@
             }
         ],
         "Category": "Windows and Tasks",
-        "Description": "Roman-numeral virtual desktop indicator (I II III) with a slate capsule for the active desktop.",
+        "Description": "Roman-numeral virtual desktop indicator (I II III), stacked in a vertical bar, with a slate capsule for the active desktop.",
         "Icon": "virtual-desktops",
         "Id": "org.empire.mist.ages",
         "License": "MIT",
