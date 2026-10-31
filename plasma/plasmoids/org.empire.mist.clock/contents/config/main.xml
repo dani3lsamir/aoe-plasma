@@ -27,7 +27,7 @@
       <default></default>
     </entry>
     <entry name="fontScale" type="Double">
-      <label>Text size relative to the bar width in a vertical bar (36px applet → 12px text)</label>
+      <label>Text size relative to the bar width in a vertical bar (32px bar → 11px text; shrinks if the date would not fit)</label>
       <default>0.34</default>
     </entry>
   </group>

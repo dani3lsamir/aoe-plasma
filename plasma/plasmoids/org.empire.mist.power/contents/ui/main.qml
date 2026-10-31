@@ -21,6 +21,9 @@ PlasmoidItem {
 
     preferredRepresentation: fullRepresentation
     Plasmoid.backgroundHints: PlasmaCore.Types.NoBackground
+    // In a vertical bar, take the full bar width like the native task manager
+    // does (no panel margins), so everything lines up with the app icons.
+    Plasmoid.constraintHints: Plasmoid.formFactor === PlasmaCore.Types.Vertical ? Plasmoid.CanFillArea : 0
     toolTipMainText: i18n("Power")
 
     Sessions.SessionManagement {
@@ -74,8 +77,9 @@ PlasmoidItem {
         id: button
 
         readonly property bool vertical: Plasmoid.formFactor === PlasmaCore.Types.Vertical
-        // Applet thickness = panel thickness minus the Breeze panel margins.
-        readonly property int iconSize: Math.max(14, Math.round(vertical ? root.width * 0.55 : root.height * 0.82))
+        // Vertical: full bar width (32px bar → 20px icon, like the tray icons).
+        // Horizontal: panel thickness minus the Breeze panel margins.
+        readonly property int iconSize: Math.max(14, Math.round(vertical ? root.width * 0.62 : root.height * 0.82))
         readonly property int length: iconSize + 14
 
         Layout.minimumWidth: vertical ? 0 : length

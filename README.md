@@ -15,7 +15,7 @@ Una sola barra vertical a la izquierda, fina y opaca, con colores sacados del wa
 
 ## Qué hace
 
-Barra vertical de 44 px en el borde izquierdo, de arriba abajo:
+Barra vertical de 32 px en el borde izquierdo, con iconos de apps de 24 px como en Windows. De arriba abajo:
 
 | Zona | Contenido | Componente |
 |---|---|---|
@@ -103,7 +103,7 @@ Opciones:
 --no-panel       solo tema, KWin, Konsole y prompt
 --no-shell       no tocar bash/zsh/fish
 --no-desktops    no cambiar número/nombres de escritorios
---thickness 44   ancho de la barra en px (36–64)
+--thickness 32   ancho de la barra en px (30–64); los iconos de apps miden el ancho − 8 px
 ```
 
 ### Restaurar
@@ -186,7 +186,7 @@ Los colores de Konsole están en `config/konsole/EmpireMist.colorscheme`. Los de
 
 **Tamaños:**
 
-- **Ancho de la barra:** `./install.sh --thickness 48`, o *clic derecho en la barra → Mostrar configuración del panel → Ancho*. Plasma deja 4 px a cada lado, así que en una barra de 44 px cada widget tiene 36 px; los números romanos, el reloj y el apagado se escalan con ese ancho.
+- **Ancho de la barra:** `./install.sh --thickness 36`, o *clic derecho en la barra → Mostrar configuración del panel → Ancho*. El gestor de tareas de Plasma no tiene ajuste de tamaño de icono: cada icono de app mide el ancho de la barra menos 8 px (30 → 22 px, 32 → 24 px, 36 → 28 px, 44 → 36 px). Los números romanos, el reloj y el apagado se escalan con el ancho, y el reloj reduce la letra si la fecha no cabe.
 - **Ajustes guardados por widget** en `~/.config/plasma-org.kde.plasma.desktop-appletsrc` (se aplican al reiniciar Plasma: `systemctl --user restart plasma-plasmashell`):
 
 | Widget | Clave | Por defecto | Qué hace |
@@ -194,7 +194,7 @@ Los colores de Konsole están en `config/konsole/EmpireMist.colorscheme`. Los de
 | Empire Clock | `dateFormat` | `M/d` | Formato de la fecha: `M/d` da `10/31`, `d/M` da `31/10` |
 | Empire Clock | `twentyFourHour` | `false` | Formato de 24 horas |
 | Empire Clock | `showAmPm` | `false` | Añade `A` o `P` a la hora (`1:38 P`) |
-| Empire Clock | `fontScale` | `0.34` | Tamaño del texto respecto al ancho del widget (≈ 12 px en una barra de 44 px) |
+| Empire Clock | `fontScale` | `0.34` | Tamaño del texto respecto al ancho de la barra (≈ 10–11 px en 32 px; baja solo si la fecha no cabe) |
 | Empire Ages | `fontFamily` | `serif` | Fuente de los números romanos (vacío = fuente de Plasma) |
 
 ---
@@ -213,9 +213,9 @@ Los colores de Konsole están en `config/konsole/EmpireMist.colorscheme`. Los de
 **Comprobado aquí** (contenedor Linux sin escritorio, con las herramientas KDE simuladas):
 
 - `shellcheck` sin avisos en `install.sh`, `restore.sh`, `lib/common.sh` y el prompt de bash.
-- Los widgets propios se ejecutaron en un motor Qt 6.9 real, dentro de una barra simulada de 44 px que copia las reglas de tamaño del panel de Plasma 6.4, con clics de ratón reales (30/30 comprobaciones):
-  - `I II III` apilados justo debajo del logo, de 36 × 24 px, con números de 12 px; el clic cambia de escritorio en KWin;
-  - el reloj muestra dos líneas centradas (`4:27` sobre `10/26`), cabe en 36 px y abre el calendario a la derecha de la barra;
+- Los widgets propios se ejecutaron en un motor Qt 6.9 real, dentro de barras simuladas de 30, 32, 36 y 44 px que copian las reglas de tamaño del panel de Plasma 6.4, con Noto Sans y DejaVu Sans y con clics de ratón reales (26/26 comprobaciones en cada caso):
+  - `I II III` apilados justo debajo del logo, ocupando todo el ancho de la barra (en 32 px: números de 11 px); el clic cambia de escritorio en KWin;
+  - el reloj muestra dos líneas centradas (`4:27` sobre `10/26`) que siempre caben en la barra (10 px en 32 px con Noto Sans); abre el calendario a la derecha, y pulsarlo con el calendario abierto lo cierra;
   - el apagado es lo último de la barra, su menú se abre a la derecha y cada opción llega a la sesión de Plasma;
   - nada se solapa y no hay avisos de QML.
 - En Plasma 6.0–6.5 el reloj usa la fuente de hora anterior y funciona.

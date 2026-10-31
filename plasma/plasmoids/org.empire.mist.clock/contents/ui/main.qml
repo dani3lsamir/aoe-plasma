@@ -31,6 +31,9 @@ PlasmoidItem {
 
     preferredRepresentation: fullRepresentation
     Plasmoid.backgroundHints: PlasmaCore.Types.NoBackground
+    // In a vertical bar, take the full bar width like the native task manager
+    // does (no panel margins), so everything lines up with the app icons.
+    Plasmoid.constraintHints: Plasmoid.formFactor === PlasmaCore.Types.Vertical ? Plasmoid.CanFillArea : 0
 
     toolTipMainText: now.toLocaleDateString(locale, Locale.LongFormat)
 
@@ -62,10 +65,22 @@ PlasmoidItem {
     fullRepresentation: MouseArea {
         id: area
 
-        // Applet thickness = panel thickness minus the Breeze panel margins
-        // (44px vertical bar → 36px wide, 30px horizontal bar → 22px tall).
+        // Vertical: full bar width (32px bar → 32px). Horizontal: panel thickness
+        // minus the Breeze panel margins (30px bar → 22px tall).
         readonly property int thickness: Math.max(16, Math.round(root.vertical ? root.width : root.height))
-        readonly property int textSize: Math.round(thickness * (root.vertical ? Plasmoid.configuration.fontScale : 0.6))
+        readonly property int wantedSize: Math.round(thickness * (root.vertical ? Plasmoid.configuration.fontScale : 0.6))
+        // In a narrow vertical bar, shrink the text if the longer line would not fit.
+        // (3% safety margin: glyph widths do not scale perfectly with the size.)
+        readonly property int textSize: root.vertical && widest.width > thickness - 4
+            ? Math.max(8, Math.floor(wantedSize * (thickness - 4) / widest.width * 0.97))
+            : wantedSize
+
+        TextMetrics {
+            id: widest
+            font.family: Plasmoid.configuration.fontFamily || Kirigami.Theme.defaultFont.family
+            font.pixelSize: area.wantedSize
+            text: root.timeText.length > root.dateText.length ? root.timeText : root.dateText
+        }
 
         Layout.minimumWidth: root.vertical ? 0 : content.implicitWidth + 16
         Layout.preferredWidth: root.vertical ? -1 : content.implicitWidth + 16

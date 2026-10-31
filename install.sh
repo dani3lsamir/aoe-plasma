@@ -17,7 +17,7 @@ DO_PANEL=1
 REPLACE_PANELS=1
 DO_SHELL=1
 DO_DESKTOPS=1
-THICKNESS=44
+THICKNESS=32
 AGE_NAMES=("Dark Age" "Feudal Age" "Castle Age")
 
 usage() {
@@ -32,7 +32,8 @@ Usage: ./install.sh [options]
   --no-panel         Do not create the bar (colors, KWin, Konsole, prompt only).
   --no-shell         Do not add the prompt to any shell.
   --no-desktops      Do not change the number/names of virtual desktops.
-  --thickness PX     Width of the vertical bar in pixels, 36–64 (default: $THICKNESS).
+  --thickness PX     Width of the vertical bar in pixels, 30–64 (default: $THICKNESS).
+                     App icons are the width minus 8px: 32 → 24px icons.
   -h, --help         This help.
 
 Keyboard layouts are never touched: the indicator shows whatever your
@@ -54,8 +55,8 @@ while (( $# )); do
     esac
     shift
 done
-if ! [[ $THICKNESS =~ ^[0-9]+$ ]] || (( THICKNESS < 36 || THICKNESS > 64 )); then
-    die "--thickness must be 36–64"
+if ! [[ $THICKNESS =~ ^[0-9]+$ ]] || (( THICKNESS < 30 || THICKNESS > 64 )); then
+    die "--thickness must be 30–64"
 fi
 
 # ════════════════════════════════════════════════════════════════════════

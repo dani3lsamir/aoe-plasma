@@ -28,6 +28,9 @@ PlasmoidItem {
 
     preferredRepresentation: fullRepresentation
     Plasmoid.backgroundHints: PlasmaCore.Types.NoBackground
+    // In a vertical bar, take the full bar width like the native task manager
+    // does (no panel margins), so everything lines up with the app icons.
+    Plasmoid.constraintHints: Plasmoid.formFactor === PlasmaCore.Types.Vertical ? Plasmoid.CanFillArea : 0
 
     TaskManager.VirtualDesktopInfo {
         id: desktopInfo
@@ -71,8 +74,8 @@ PlasmoidItem {
         id: area
 
         readonly property bool vertical: Plasmoid.formFactor === PlasmaCore.Types.Vertical
-        // Plasma gives the applet the panel thickness minus the Breeze panel margins
-        // (4px each side): 44px vertical bar → 36px wide, 30px horizontal bar → 22px tall.
+        // Vertical: the full bar width (32px bar → 32px). Horizontal: the panel
+        // thickness minus the Breeze panel margins (30px bar → 22px tall).
         readonly property int thickness: Math.max(16, Math.round(vertical ? root.width : root.height))
         readonly property int capsuleLength: vertical ? Math.round(thickness * 0.66) : thickness
         readonly property int numeralSize: Math.round((vertical ? thickness * 0.34 : thickness * 0.55))
