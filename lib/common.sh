@@ -94,11 +94,11 @@ plasmashell_stop() {
             || true
     fi
     local i
-    for i in $(seq 1 50); do
+    for i in $(seq 1 150); do
         pgrep -u "$UID" -x plasmashell >/dev/null || return 0
         sleep 0.2
     done
-    warn "plasmashell did not exit in 10 s"
+    warn "plasmashell did not exit in 30 s"
     return 1
 }
 

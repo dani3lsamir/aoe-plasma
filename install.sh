@@ -33,10 +33,10 @@ Usage: ./install.sh [options]
   --no-shell         Do not add the prompt to any shell.
   --no-desktops      Do not change the number/names of virtual desktops.
   --thickness PX     Width of the vertical bar in pixels, 36–64 (default: $THICKNESS).
+  -h, --help         This help.
 
 Keyboard layouts are never touched: the indicator shows whatever your
 system is configured with (System Settings → Keyboard).
-  -h, --help         This help.
 EOF
 }
 

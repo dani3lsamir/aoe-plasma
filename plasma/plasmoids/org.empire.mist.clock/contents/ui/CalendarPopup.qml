@@ -1,7 +1,7 @@
 /*
     The KDE calendar (PlasmaCalendar.MonthView, the same component as in the
-    Digital Clock popup) in a solid Plasma dialog anchored under the clock.
-    Created on first use only.
+    Digital Clock popup) in a solid Plasma dialog placed next to the clock
+    (to the right of a left vertical bar). Created on first use only.
 */
 import QtQuick
 
@@ -16,6 +16,7 @@ Item {
     property Item anchorItem
     property var today: new Date()
     readonly property bool shown: loader.item ? loader.item.visible : false
+    property real hiddenAt: 0
 
     function toggle(): void {
         if (!loader.active) {
@@ -24,6 +25,11 @@ Item {
         const dialog = loader.item;
         if (dialog.visible) {
             dialog.visible = false;
+        } else if (Date.now() - hiddenAt < 300) {
+            // Clicking the clock while the calendar is open first takes focus
+            // away from it (hideOnWindowDeactivate closes it), then delivers
+            // the click: that click meant "close", so do not reopen.
+            return;
         } else {
             dialog.visible = true;
             dialog.requestActivate();
@@ -66,6 +72,8 @@ Item {
                 if (visible) {
                     // Always open on the current month.
                     monthView.resetToToday();
+                } else {
+                    popup.hiddenAt = Date.now();
                 }
             }
         }
